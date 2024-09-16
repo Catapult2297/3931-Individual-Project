@@ -1,7 +1,7 @@
-# Basic Rust Code Logic Analyzer
+# Basic Rust Code Logic Analyser
 
 ## Overview
-The Rust Code Logic Analyzer is a tool designed to analyse Rust programmes for logical errors and assist programmers during development.
+The Rust Code Logic Analyser is a tool designed to analyse Rust programmes for logical errors and assist programmers during development.
 This analyser will focus specifically on basic data types and control flow, rather than attempting to fully verify large codebases.
 The goal is to provide useful insights that help developers catch common issues early in the development process.
 
