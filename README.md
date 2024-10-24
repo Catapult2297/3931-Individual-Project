@@ -22,7 +22,6 @@ The goal is to provide useful insights that help developers catch common issues 
 1. Clone the repository:
    ```bash
    git clone https://github.com/Catapult2297/3931-Individual-Project.git
-   cd rust-code-logic-analyzer
    ```
 2. Build the project:
    ```bash
