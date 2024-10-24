@@ -1,0 +1,179 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage{tgbonum}
+\usepackage{hyperref}
+
+%Stop auto indent
+\usepackage{parskip}
+
+%Enhancements for improving the information structure and printed output
+\usepackage{amsmath}
+
+%Provides an extended symbol collection
+\usepackage{amssymb}
+
+%Helps to define theorem-like structures
+\usepackage{amsthm}
+
+%Doublestroke package
+%\usepackage{dsfont}
+
+%Load pictures into document
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+%Fancy headers
+\usepackage{fancyhdr}
+
+%Page size and margins
+\usepackage[a4paper,left=3cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
+
+%An extended implementation of the array and tabular environments
+\usepackage{array}
+\newcolumntype{L}{>{$}c<{$}} %Use ``L'' in tabular to write maths
+
+\usepackage{esint}
+%Program code related packages
+%Use \begin{lstlisting} and \end{lstlisting} to create program code
+%environment
+\usepackage{listings}
+\usepackage[svgnames]{xcolor}
+\usepackage{fontspec}
+\setmonofont[Scale=0.85]{FiraCode Nerd Font}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstset{
+  frame=tb,
+  backgroundcolor=\color{backcolour},
+  language=Python, %Change this for other programming languages e.g. Python, Java
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\footnotesize\ttfamily},
+  numbers=left,
+  numberstyle=\tiny\color{lightgray},
+  keywordstyle=\color{red},
+  commentstyle=\color{Green},
+  stringstyle=\color{blue},
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=4
+}
+\begin{document}
+
+\pagestyle{fancy}
+%Module Name
+\fancyhead[L]{\footnotesize{COMP3931 Individual Project}}
+%Document Name
+\fancyhead[R]{\footnotesize{Project Outline}}
+%Name and Student ID
+\fancyfoot[R]{\footnotesize Wing Fung Choy [201519376]}
+
+\newcommand{\vect}[1]{\underline{\boldsymbol{#1}}}
+\newcommand{\headingtitle}[1]{\textbf{#1}\normalsize\\}
+\newcommand{\keyword}[1]{\colorbox{lightgray}{\texttt{#1}}}
+%===============================
+\begin{center}
+    \textbf{COMP3931}\\
+    Individual Project\\
+\end{center}
+\vspace{11pt}
+\begin{center}
+    Project Outline
+    \vspace{11pt}
+\end{center}
+
+Summary:\\
+This project aims to develop a Basic Rust Code Logic Analyser specifically 
+designed for the Rust programming language. Drawing inspiration from foundational 
+works in the field, including the 1973 paper "Automatic Program Verification I: 
+A Logical Basis and Its Implementation" and the 1976 paper "Automatic Program 
+Verification V: Verification-Oriented Proof Rules for Arrays, Records, and Pointers".
+The project aims to integrate classical verification techniques with modern 
+programming paradigms.
+
+By leveraging Hoare logic, the verifier establishes a formal 
+framework for reasoning about program correctness. The implementation seeks to 
+adapt these established principles to the unique features and safety guarantees 
+provided by Rust, thereby enhancing the reliability of software development in a 
+contemporary context.
+
+This analyser aims to provide developers with automated tools to verify the correctness
+of their Rust programs, ensuring adherence to specified properties and reducing 
+the likelihood of errors.
+
+%\vspace{22pt}
+%Student: \author1{Wing Fung Choy - \href{mailto:sc21wfc@leeds.ac.uk}{sc21wfc@leeds.ac.uk}}
+
+%\vspace{11pt}
+%Supervisor: Professor Dillon Mayhew - \href{mailto:D.Mayhew@leeds.ac.uk}{D.Mayhew@leeds.ac.uk}
+%\vspace{11pt}
+
+\pagebreak
+\section{Project Scope}
+The primary focus of this analyser is to evaluate basic data types and control flow
+within Rust programs. By concentrating on these fundamental aspects, the analyser aims
+to provide effective verification without the complexities associated with fully 
+verifying extensive codebases. This targeted approach allows for a more manageable 
+analysis process, ensuring that essential properties of the code can be validated 
+efficiently.
+
+It is important to note that the analyser will not encompass a full termination 
+analysis of programs. Given that the halting problem is undecidable, attempting to 
+ascertain whether arbitrary programs will terminate is outside the scope of this 
+project. Instead, the focus will remain on verifying the correctness of operations 
+within the defined parameters of basic data types and control structures.
+
+Additionally, this analyser will be limited in the types of statements it can 
+interpret, adhering closely to the constraints outlined in the foundational papers 
+on automatic program verification. By imposing these limitations, the analyser can 
+maintain a clear and focused methodology, ensuring that the verification process 
+remains both feasible and effective. This approach allows for meaningful insights 
+into the behaviour of the code while recognising the inherent challenges in broader 
+program verification.
+
+\pagebreak
+\section{Challenges and Difficulities}
+These are the potential challenges that may arise during development:
+\begin{enumerate}
+    \item Rust has a sophisticated type system that includes features like ownership,
+          borrowing, and lifetimes. Accurately modelling these concepts in an analyser can be 
+          complex, as they introduce nuances that traditional analysers may not 
+          account for.
+    \item Integrating the analyser with existing Rust tooling and workflows can
+          present challenges. Ensuring compatibility and usability within the Rust 
+          ecosystem will require careful design and implementation.
+    \item As Rust continues to evolve, keeping the analyser updated with the latest
+          language features and paradigms will require ongoing effort and adaptability.
+    \item Achieving both soundness and completeness in the analyzer is a critical
+          challenge.
+\end{enumerate}
+
+\pagebreak
+\section{Implementation Plan}
+This project will split into these key steps:
+\begin{enumerate}
+    \item Understand the original papers, Hoare logic and the Pascal Language.
+    \item Create a program that will take a Rust program (or snippet) as an input,
+          and parse the program to generate an Abstract Syntax Tree.
+    \item Generate or take a user's input as the proof goal for the analyser.
+    \item Generate a complete proof of the program using techniques such as
+          Natural Deduction or Resolution
+\end{enumerate}
+
+\pagebreak
+\section{Ethical Problems}
+Here are some ethical problems that will need to be considered during development:
+\begin{itemize}
+    \item Software Reliability and Safety.
+    \item User Trust and Transparency.
+    \item Intellectual Property.
+    \item Bias in Coding Styles.
+    \item Job Displacement.
+    \item Security Vulnerability.
+    \item Responsibility for Errors.
+    \item Accessibility.
+    \item Computational Resources.
+\end{itemize}
+%===============================
+\end{document}
