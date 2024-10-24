@@ -1,0 +1,4 @@
+# ignore compiled files and some cargo files in ast
+ast/target
+ast/Cargo.lock
+ast/code_output.txt
