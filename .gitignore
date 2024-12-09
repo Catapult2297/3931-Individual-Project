@@ -2,3 +2,5 @@
 ast/target
 ast/Cargo.lock
 ast/code_output.txt
+hoare_logic/target
+hoare_logic/Cargo.lock
