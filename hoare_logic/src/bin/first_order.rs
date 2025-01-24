@@ -16,31 +16,116 @@ pub enum Formula {
 impl Formula {
     pub fn new<T: Into<String>>(input: T) -> Self {
         let input_str: String = input.into();
-        let tokens = input_str
+        let tokens: Vec<String> = input_str
             .split_whitespace()
             .map(String::from)
             .collect::<Vec<_>>();
-        let mut parser = Parser::new(&tokens);
+        let mut parser: Parser<'_> = Parser::new(&tokens);
         parser.parse()
+    }
+    pub fn to_prefix_notation(&self) -> String {
+        match self {
+            Formula::Atom(ref s) => format!("{s}"),
+            Formula::Negation(ref formula) => format!("¬ {}", formula.to_prefix_notation()),
+            Formula::Conjunction(ref lhs, ref rhs) => {
+                format!(
+                    "∧ {} {}",
+                    lhs.to_prefix_notation(),
+                    rhs.to_prefix_notation()
+                )
+            }
+            Formula::Disjunction(ref lhs, ref rhs) => format!(
+                "∨ {} {}",
+                lhs.to_prefix_notation(),
+                rhs.to_prefix_notation()
+            ),
+            Formula::Implication(ref lhs, ref rhs) => format!(
+                "→ {} {}",
+                lhs.to_prefix_notation(),
+                rhs.to_prefix_notation()
+            ),
+            Formula::Equivalence(ref lhs, ref rhs) => format!(
+                "= {} {}",
+                lhs.to_prefix_notation(),
+                rhs.to_prefix_notation()
+            ),
+            Formula::UniversalQuantifier(ref variable, ref formula) => {
+                format!("∀ {} {}", variable, formula.to_prefix_notation())
+            }
+            Formula::ExistentialQuantifier(ref variable, ref formula) => {
+                format!("∃ {} {}", variable, formula.to_prefix_notation())
+            }
+        }
+    }
+    fn to_infix_notation(&self) -> String {
+        match self {
+            Formula::Atom(ref s) => format!("{s}"),
+            Formula::Negation(ref formula) => format!("¬ {}", formula.to_prefix_notation()),
+            Formula::Conjunction(ref lhs, ref rhs) => {
+                format!("({}∧{})", lhs.to_infix_notation(), rhs.to_infix_notation())
+            }
+            Formula::Disjunction(ref lhs, ref rhs) => {
+                format!("({}∨{})", lhs.to_infix_notation(), rhs.to_infix_notation())
+            }
+            Formula::Implication(ref lhs, ref rhs) => {
+                format!("({}→{})", lhs.to_infix_notation(), rhs.to_infix_notation())
+            }
+            Formula::Equivalence(ref lhs, ref rhs) => {
+                format!("({}={})", lhs.to_infix_notation(), rhs.to_infix_notation())
+            }
+            Formula::UniversalQuantifier(ref variable, ref formula) => {
+                format!("∀{}({})", variable, formula.to_infix_notation())
+            }
+            Formula::ExistentialQuantifier(ref variable, ref formula) => {
+                format!("∃{}({})", variable, formula.to_infix_notation())
+            }
+        }
+    }
+    pub fn get_info(&self) -> [String; 3] {
+        match self {
+            Formula::Atom(ref s) => ["Atom".to_string(), s.to_string(), "".to_string()],
+            Formula::Negation(ref formula) => [
+                "Negation".to_string(),
+                formula.to_prefix_notation(),
+                "".to_string(),
+            ],
+            Formula::Conjunction(ref lhs, ref rhs) => [
+                "Conjunction".to_string(),
+                lhs.to_prefix_notation(),
+                rhs.to_prefix_notation(),
+            ],
+            Formula::Disjunction(ref lhs, ref rhs) => [
+                "Disjunction".to_string(),
+                lhs.to_prefix_notation(),
+                rhs.to_prefix_notation(),
+            ],
+            Formula::Implication(ref lhs, ref rhs) => [
+                "Implication".to_string(),
+                lhs.to_prefix_notation(),
+                rhs.to_prefix_notation(),
+            ],
+            Formula::Equivalence(ref lhs, ref rhs) => [
+                "Equivalence".to_string(),
+                lhs.to_prefix_notation(),
+                rhs.to_prefix_notation(),
+            ],
+            Formula::UniversalQuantifier(ref variable, ref formula) => [
+                "UniversalQuantifier".to_string(),
+                variable.to_string(),
+                formula.to_prefix_notation(),
+            ],
+            Formula::ExistentialQuantifier(ref variable, ref formula) => [
+                "ExistentialQuantifier".to_string(),
+                variable.to_string(),
+                formula.to_prefix_notation(),
+            ],
+        }
     }
 }
 
 impl fmt::Display for Formula {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Formula::Atom(ref s) => write!(f, "{}", s),
-            Formula::Negation(ref formula) => write!(f, "¬({formula})"),
-            Formula::Conjunction(ref lhs, ref rhs) => write!(f, "({lhs}∧{rhs})"),
-            Formula::Disjunction(ref lhs, ref rhs) => write!(f, "({lhs}∨{rhs})"),
-            Formula::Implication(ref lhs, ref rhs) => write!(f, "({lhs}→{rhs})"),
-            Formula::Equivalence(ref lhs, ref rhs) => write!(f, "({lhs}={rhs})"),
-            Formula::UniversalQuantifier(ref variable, ref formula) => {
-                write!(f, "∀{variable}({formula})")
-            }
-            Formula::ExistentialQuantifier(ref variable, ref formula) => {
-                write!(f, "∃{variable}({formula})")
-            }
-        }
+        write!(f, "{}", self.to_infix_notation())
     }
 }
 
@@ -105,7 +190,7 @@ impl<'a> Parser<'a> {
 }
 
 fn main() {
-    let formulae: [Formula; 8] = [
+    let formulae: [Formula; 9] = [
         Formula::new("x"),
         Formula::new("¬ x"),
         Formula::new("∧ x y"),
@@ -114,10 +199,22 @@ fn main() {
         Formula::new("= x y"),
         Formula::new("∀ x x"),
         Formula::new("∃ x x"),
+        Formula::new("→ b ∧ c d"),
     ];
 
+    println!(
+        "{:<20} {:<60} {:<60}",
+        "Formula", "Formula (Debug)", "Formula (Info Array)"
+    );
+    println!("{:-<20} {:-<60} {:-<60}", "", "", "");
+
     for formula in formulae {
-        print!("{formula}");
-        print!("            {:?}\n", formula);
+        let array: [String; 3] = formula.get_info();
+        println!(
+            "{:<20} {:<60} {:<60}",
+            format!("{}", formula),
+            format!("{:?}", formula),
+            format!("{:?}", array)
+        );
     }
 }
