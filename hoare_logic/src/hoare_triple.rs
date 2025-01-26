@@ -12,14 +12,13 @@
 #[allow(dead_code)]
 use std::fmt;
 
-use first_order::Formula;
-mod first_order;
+use crate::first_order::Formula;
 
 /// A struct for storing the three parts of a Hoare Triple
 pub struct Triple {
-    precondition: first_order::Formula,
+    precondition: Formula,
     command: String,
-    postcondition: first_order::Formula,
+    postcondition: Formula,
 }
 
 impl Triple {
@@ -40,9 +39,9 @@ impl Triple {
     /// ```
     pub fn new<T: Into<String>>(precondition: T, command: T, postcondition: T) -> Triple {
         Triple {
-            precondition: first_order::Formula::new(precondition),
+            precondition: Formula::new(precondition),
             command: command.into(),
-            postcondition: first_order::Formula::new(postcondition),
+            postcondition: Formula::new(postcondition),
         }
     }
 }
@@ -124,7 +123,7 @@ pub fn while_rule(input: &Triple) -> Triple {
         input.postcondition.to_string(),
         format!(
             " while {} do {} done",
-            input.precondition.get_info()[2],
+            Formula::new(&input.precondition.get_info()[2]).to_string(),
             input.command
         ),
         format!(
@@ -137,9 +136,9 @@ pub fn while_rule(input: &Triple) -> Triple {
 
 fn main() {
     let test: Triple = Triple {
-        precondition: first_order::Formula::new("= ⊤ ⊤"),
+        precondition: Formula::new("= ⊤ ⊤"),
         command: String::from("a ≔ 5"),
-        postcondition: first_order::Formula::new("= a 5"),
+        postcondition: Formula::new("= a 5"),
     };
 
     let test2: Triple = Triple::new("= ⊤ ⊤", "skip", "= ⊤ ⊤");

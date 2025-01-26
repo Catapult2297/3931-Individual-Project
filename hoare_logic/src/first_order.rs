@@ -8,6 +8,7 @@
 //! - Disjunction
 //! - Implication
 //! - Equivalence
+//! - Less Than
 //! - Universal Quantifier
 //! - Existential Quantifier
 
@@ -23,6 +24,7 @@ pub enum Formula {
     Disjunction(Box<Formula>, Box<Formula>),     // OR
     Implication(Box<Formula>, Box<Formula>),     // IMPLIES
     Equivalence(Box<Formula>, Box<Formula>),     // EQUIVALANCE
+    LessThan(Box<Formula>, Box<Formula>),        // LESS THAN
     UniversalQuantifier(String, Box<Formula>),   // FOR ALL
     ExistentialQuantifier(String, Box<Formula>), // THERE EXIST
 }
@@ -86,6 +88,11 @@ impl Formula {
                 lhs.to_prefix_notation(),
                 rhs.to_prefix_notation()
             ),
+            Formula::LessThan(ref lhs, ref rhs) => format!(
+                "< {} {}",
+                lhs.to_prefix_notation(),
+                rhs.to_prefix_notation()
+            ),
             Formula::UniversalQuantifier(ref variable, ref formula) => {
                 format!("∀ {} {}", variable, formula.to_prefix_notation())
             }
@@ -119,6 +126,9 @@ impl Formula {
             }
             Formula::Equivalence(ref lhs, ref rhs) => {
                 format!("({}={})", lhs.to_infix_notation(), rhs.to_infix_notation())
+            }
+            Formula::LessThan(ref lhs, ref rhs) => {
+                format!("({}<{})", lhs.to_infix_notation(), rhs.to_infix_notation())
             }
             Formula::UniversalQuantifier(ref variable, ref formula) => {
                 format!("(∀{})({})", variable, formula.to_infix_notation())
@@ -166,6 +176,11 @@ impl Formula {
             ],
             Formula::Equivalence(ref lhs, ref rhs) => [
                 "Equivalence".to_string(),
+                lhs.to_prefix_notation(),
+                rhs.to_prefix_notation(),
+            ],
+            Formula::LessThan(ref lhs, ref rhs) => [
+                "LessThan".to_string(),
                 lhs.to_prefix_notation(),
                 rhs.to_prefix_notation(),
             ],
@@ -282,6 +297,11 @@ impl<'a> Parser<'a> {
                 let left: Formula = self.parse_formula();
                 let right: Formula = self.parse_formula();
                 Formula::Equivalence(Box::new(left), Box::new(right))
+            }
+            "<" => {
+                let left: Formula = self.parse_formula();
+                let right: Formula = self.parse_formula();
+                Formula::LessThan(Box::new(left), Box::new(right))
             }
             _ => Formula::Atom(token.clone()), // Atomic proposition
         }
