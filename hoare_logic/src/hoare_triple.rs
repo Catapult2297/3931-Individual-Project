@@ -122,7 +122,7 @@ pub fn while_rule(input: &Triple) -> Triple {
     Triple::new(
         input.postcondition.to_string(),
         format!(
-            " while {} do {} done",
+            "while {} do {} done",
             Formula::new(&input.precondition.get_info()[2]).to_string(),
             input.command
         ),
