@@ -80,7 +80,7 @@ pub fn composition_rule(left: &Triple, right: &Triple) -> Triple {
     )
 }
 
-/// Creates a new `Triple` using the Condition Rule [1].
+/// Creates a new `Triple` using the Condition Rule [2].
 ///
 /// # Arguments
 /// * `left` - The Triple with the unnegated condition.
@@ -96,7 +96,7 @@ pub fn composition_rule(left: &Triple, right: &Triple) -> Triple {
 /// let triple3: Triple = composition_rule(&triple1, &triple2);
 /// println!("{triple3}"); // Output: {(⊤=⊤)} x≔5;y≔x+1 {(y=6)}
 /// ```
-/// [1]: https://en.wikipedia.org/wiki/Hoare_logic#Rule_of_composition
+/// [2]: https://en.wikipedia.org/wiki/Hoare_logic#Conditional_rule
 pub fn condition_rule(left: &Triple, right: &Triple) -> Triple {
     Triple::new(
         format!("{}", left.precondition.get_info()[2]),
@@ -112,7 +112,7 @@ pub fn condition_rule(left: &Triple, right: &Triple) -> Triple {
 
 pub fn consequence_rule(left: &Formula, middle: &Triple, right: &Formula) -> Triple {
     Triple::new(
-        format!("{}", left.get_info()[2]),
+        format!("{}", left.get_info()[1]),
         format!("{}", middle.command),
         format!("{}", right.get_info()[2]),
     )
@@ -137,7 +137,7 @@ pub fn while_rule(input: &Triple) -> Triple {
 fn main() {
     let test: Triple = Triple {
         precondition: Formula::new("= ⊤ ⊤"),
-        command: String::from("a ≔ 5"),
+        command: String::from("a≔5"),
         postcondition: Formula::new("= a 5"),
     };
 

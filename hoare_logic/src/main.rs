@@ -1,29 +1,48 @@
+#![allow(dead_code)]
 mod first_order;
 mod hoare_triple;
-//use first_order::Formula;
-use hoare_triple::Triple;
+use first_order::Formula;
+use hoare_triple::{composition_rule, consequence_rule, while_rule, Triple};
+use std::env;
 
 fn main() {
+    //env::set_var("RUST_BACKTRACE", "1");
     let mut proof: Vec<Triple> = vec![];
-    proof.push(Triple::new("∧ = a ϕ = b ψ", "q≔0", "∧ ∧ = a ϕ = b ψ = q 0"));
-    proof.push(Triple::new(
-        "∧ ∧ = a ϕ = b ψ = q 0",
-        "r≔0",
-        "∧ ∧ ∧ = a ϕ = b ψ = q 0 = r 0",
+    //line 1
+    let lemma1: Formula = Formula::new("→ ⊤ = x x+y*0");
+    //line 2; proof[0]
+    proof.push(Triple::new("= x x+y*0", "r≔x", "= x r+y*0"));
+    //line 3; proof[1]
+    proof.push(Triple::new("= x r+y*0", "q≔0", "= x r+y*q"));
+    //line 4; proof[2]
+    proof.push(consequence_rule(
+        &lemma1,
+        &proof[0],
+        &Formula::new("→ = x r+y*0 = x r+y*0"),
     ));
-    proof.push(Triple::new(
-        "∧ ∧ ∧ = a ϕ = b ψ = q 0 = r 0",
-        "b≔b",
-        "∧ ∧ ∧ = a ϕ = b ψ = q 0 = r 0",
+    //line 5; proof[3]
+    proof.push(composition_rule(&proof[2], &proof[1]));
+    //line 6
+    let lemma2: Formula = Formula::new("→ ∧ = x r+y*q ∨ < y r = y r = x (r-y)+y*(1+q)");
+    //line 7; proof[4]
+    proof.push(Triple::new("(x=(r-y)+y*(1+q))", "r≔r-y", "= x r+y*(q+q)"));
+    //line 8; proof[5]
+    proof.push(Triple::new("= x r+y*(1+q)", "q≔1+q", "= x r+y*q"));
+    //line 9; proof[6]
+    proof.push(composition_rule(&proof[4], &proof[5]));
+    //line 10; proof[7]
+    proof.push(consequence_rule(
+        &lemma2,
+        &proof[6],
+        &Formula::new("→ = x r+y*q = x r+y*q"),
     ));
-    proof.push(Triple::new(
-        "∧ ∧ ∧ = a ϕ = b ψ = q 0 = r 0",
-        "b≔b",
-        "∧ ∧ ∧ = a ϕ = b ψ = q 0 = r 0",
-    ));
-    proof.push(hoare_triple::while_rule(&proof[2]));
-
-    for i in proof {
-        println!("{i}");
+    //line 11
+    let lemma3: Formula = Formula::new("→ ∧ = x r+y*q ¬ ∨ < y r = y r ∧ ¬ ∨ < y r = y r = x r+y*q");
+    //line 12; proof[8]
+    proof.push(while_rule(&proof[7]));
+    //line 13; proof[9]
+    proof.push(composition_rule(&proof[3], &proof[8]));
+    for line in proof {
+        println!("{line}");
     }
 }

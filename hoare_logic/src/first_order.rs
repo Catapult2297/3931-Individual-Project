@@ -3,14 +3,14 @@
 //! This module provides an implementation of logical formulaes using an enum `Formula`.
 //! It supports the following logical operations:
 //! - Atomic Proposition
-//! - Negation
-//! - Conjunction
-//! - Disjunction
-//! - Implication
-//! - Equivalence
-//! - Less Than
-//! - Universal Quantifier
-//! - Existential Quantifier
+//! - Negation ¬
+//! - Conjunction ∧
+//! - Disjunction ∨
+//! - Implication →
+//! - Equivalence =
+//! - Less Than <
+//! - Universal Quantifier ∀
+//! - Existential Quantifier ∃
 
 #[allow(dead_code)]
 use std::fmt;
@@ -114,7 +114,7 @@ impl Formula {
     fn to_infix_notation(&self) -> String {
         match self {
             Formula::Atom(ref s) => format!("{s}"),
-            Formula::Negation(ref formula) => format!("¬({})", formula.to_prefix_notation()),
+            Formula::Negation(ref formula) => format!("¬({})", formula.to_infix_notation()),
             Formula::Conjunction(ref lhs, ref rhs) => {
                 format!("({}∧{})", lhs.to_infix_notation(), rhs.to_infix_notation())
             }
@@ -309,7 +309,7 @@ impl<'a> Parser<'a> {
 }
 
 fn main() {
-    let formulae: [Formula; 9] = [
+    let formulae: [Formula; 10] = [
         Formula::new("x"),
         Formula::new("¬ x"),
         Formula::new("∧ x y"),
@@ -319,18 +319,19 @@ fn main() {
         Formula::new("∀ x x"),
         Formula::new("∃ x x"),
         Formula::new("∃ a → b ∧ c a"),
+        Formula::new("→ ¬ ∨ ∧ a b c d"),
     ];
 
     println!(
-        "{:<15} {:<90} {:<50}",
+        "{:<17} {:<90} {:<50}",
         "Formula", "Formula (Debug)", "Formula (Info Array)"
     );
-    println!("{:-<15} {:-<90} {:-<50}", "", "", "");
+    println!("{:-<17} {:-<90} {:-<50}", "", "", "");
 
     for formula in formulae {
         let array: [String; 3] = formula.get_info();
         println!(
-            "{:<15} {:<90} {:<50}",
+            "{:<17} {:<90} {:<50}",
             format!("{}", formula),
             format!("{:?}", formula),
             format!("{:?}", array)
