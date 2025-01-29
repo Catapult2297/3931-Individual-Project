@@ -2,7 +2,6 @@
 //!
 //! This module provides an implementation of logical formulaes using an enum `Formula`.
 //! It supports the following logical operations:
-//! - Atomic Proposition
 //! - Negation ¬
 //! - Conjunction ∧
 //! - Disjunction ∨
@@ -11,21 +10,51 @@
 //! - Less Than <
 //! - Universal Quantifier ∀
 //! - Existential Quantifier ∃
-
+#![warn(missing_docs)]
 #[allow(dead_code)]
 use std::fmt;
 
 #[derive(Debug, Clone)]
 /// An enum representing different types of logical formulae.
+///
+/// A `Formula` is defined as follows:
+/// - `⊥` is a formula.
+/// - If `R` is an `n`-place relation symbol and `a,b,...,m` are terms, then `R(a,b,...,m)` is a formula.
+/// - If `φ` and `ψ` are formulae and `x` is a variable, then the following are formulae:
+///     * `¬ φ`
+///     * `∧ φ ψ`
+///     * `∨ φ ψ`
+///     * `→ φ ψ`
+///     * `= φ ψ`
+///     * `< φ ψ`
+///     * `∀ x φ`
+///     * `∃ x φ`
 pub enum Formula {
-    Atom(String),                                // ATOMIC PROPOSITION
-    Negation(Box<Formula>),                      // NEGATION
-    Conjunction(Box<Formula>, Box<Formula>),     // AND
-    Disjunction(Box<Formula>, Box<Formula>),     // OR
-    Implication(Box<Formula>, Box<Formula>),     // IMPLIES
-    Equivalence(Box<Formula>, Box<Formula>),     // EQUIVALANCE
-    LessThan(Box<Formula>, Box<Formula>),        // LESS THAN
-    UniversalQuantifier(String, Box<Formula>),   // FOR ALL
+    /// A `Term` is define as follows
+    /// - Every variable is a term.
+    /// - Every constant symbol is a term
+    /// - if `f` is an arity `m` function symbol and `a,b,...,m` are terms then `f(a,b,...,m)` is a term.
+    /// <div class="warning">
+    /// Do not use whitespace to separate a term. The program will not build a parse tree of a term. Separate a term with whitespace will cause the program to treat the parts as different terms.
+    /// </div>
+    ///
+    /// While a term is distinct from a formula, it is necessary to include term in the `Formula` enum to facilitate the construction of a formula parse tree.
+    Term(String),
+    /// A `Negation` `Formula` takes a form `¬ φ` where `φ` is a formula.
+    Negation(Box<Formula>),
+    /// A `Conjunction` `Formula` takes a form `∧ φ ψ` where `φ` and `ψ` are formulae.
+    Conjunction(Box<Formula>, Box<Formula>),
+    /// A `Disjunction` `Formula` takes a form `∨ φ ψ` where `φ` and `ψ` are formulae.      
+    Disjunction(Box<Formula>, Box<Formula>),
+    /// A `Implication` `Formula` takes a form `→ φ ψ` where `φ` and `ψ` are formulae.  
+    Implication(Box<Formula>, Box<Formula>),
+    /// A `Equivalence` `Formula` takes a form `= φ ψ` where `φ` and `ψ` are formulae.
+    Equivalence(Box<Formula>, Box<Formula>),
+    /// A `LessThan` `Formula` takes a form `< φ ψ` where `φ` and `ψ` are formulae.
+    LessThan(Box<Formula>, Box<Formula>),
+    /// A `UniversalQuantifier` `Formula` takes a form `∀ x φ` where `φ` is a formula and `x` is a variable.
+    UniversalQuantifier(String, Box<Formula>), // FOR ALL
+    /// A `ExistentialQuantifier` `Formula` takes a form `∃ x φ` where `φ` is a formula and `x` is a variable.
     ExistentialQuantifier(String, Box<Formula>), // THERE EXIST
 }
 
@@ -33,7 +62,7 @@ impl Formula {
     /// Creates a new `Formula` from a string input.
     ///
     /// # Arguments
-    /// * `input` - A `String` or `&str` that represents the logical formula in prefix notation. Every atomic propositions, logical connectives, and logical quantifiers must be separated using a whitespace.
+    /// * `input` - A `String` or `&str` that represents the logical formula in prefix notation. Every terms, logical connectives, and logical quantifiers must be separated using a whitespace.
     ///
     /// # Returns
     /// A `Formula` instance representing the parsed logical formula.
@@ -64,7 +93,7 @@ impl Formula {
     /// ```
     fn to_prefix_notation(&self) -> String {
         match self {
-            Formula::Atom(ref s) => format!("{s}"),
+            Formula::Term(ref s) => format!("{s}"),
             Formula::Negation(ref formula) => format!("¬ {}", formula.to_prefix_notation()),
             Formula::Conjunction(ref lhs, ref rhs) => {
                 format!(
@@ -113,7 +142,7 @@ impl Formula {
     /// ```
     fn to_infix_notation(&self) -> String {
         match self {
-            Formula::Atom(ref s) => format!("{s}"),
+            Formula::Term(ref s) => format!("{s}"),
             Formula::Negation(ref formula) => format!("¬({})", formula.to_infix_notation()),
             Formula::Conjunction(ref lhs, ref rhs) => {
                 format!("({}∧{})", lhs.to_infix_notation(), rhs.to_infix_notation())
@@ -153,7 +182,7 @@ impl Formula {
     /// ```
     pub fn get_info(&self) -> [String; 3] {
         match self {
-            Formula::Atom(ref s) => ["Atom".to_string(), s.to_string(), "".to_string()],
+            Formula::Term(ref s) => ["Atom".to_string(), s.to_string(), "".to_string()],
             Formula::Negation(ref formula) => [
                 "Negation".to_string(),
                 formula.to_prefix_notation(),
@@ -224,39 +253,12 @@ struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    /// Creates a new `Parser` instance with the given tokens.
-    ///
-    /// # Arguments
-    ///
-    /// * `tokens` - A slice of strings that represent the tokens of a logical formula.
-    ///
-    /// # Returns
-    ///
-    /// A new `Parser` instance initialized with the provided tokens and the current
-    /// index set to zero.
     fn new(tokens: &'a [String]) -> Self {
         Parser { tokens, current: 0 }
     }
-    /// Parses the tokens and constructs a `Formula`.
-    ///
-    /// This method is the entry point for parsing. It starts the parsing process
-    /// and returns the resulting `Formula`.
-    ///
-    /// # Returns
-    ///
-    /// A `Formula` instance representing the parsed logical formula.
     fn parse(&mut self) -> Formula {
         self.parse_formula()
     }
-    /// Parses a formula from the current token.
-    ///
-    /// This method processes the current token and constructs the corresponding
-    /// `Formula`. It handles different types of logical operations and recursively
-    /// parses sub-formulas as needed.
-    ///
-    /// # Returns
-    ///
-    /// A `Formula` instance representing the parsed formula.
     fn parse_formula(&mut self) -> Formula {
         let token: &String = &self.tokens[self.current];
         self.current += 1;
@@ -303,7 +305,7 @@ impl<'a> Parser<'a> {
                 let right: Formula = self.parse_formula();
                 Formula::LessThan(Box::new(left), Box::new(right))
             }
-            _ => Formula::Atom(token.clone()), // Atomic proposition
+            _ => Formula::Term(token.clone()), // Atomic proposition
         }
     }
 }

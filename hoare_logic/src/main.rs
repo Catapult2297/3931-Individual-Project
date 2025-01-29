@@ -1,9 +1,10 @@
+//! Main example function that implement the example in the paper
 #![allow(dead_code)]
+#![warn(missing_docs)]
 mod first_order;
 mod hoare_triple;
 use first_order::Formula;
 use hoare_triple::{composition_rule, consequence_rule, while_rule, Triple};
-use std::env;
 
 fn main() {
     //env::set_var("RUST_BACKTRACE", "1");

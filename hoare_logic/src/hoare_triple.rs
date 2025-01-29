@@ -8,7 +8,7 @@
 //! - Condition Rule
 //! - Consequence Rule
 //! - While Rule
-
+#![warn(missing_docs)]
 #[allow(dead_code)]
 use std::fmt;
 
