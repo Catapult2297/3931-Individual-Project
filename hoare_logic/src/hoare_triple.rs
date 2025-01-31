@@ -12,7 +12,8 @@
 #[allow(dead_code)]
 use std::fmt;
 
-use crate::first_order::Formula;
+mod first_order;
+use first_order::Formula;
 
 /// A struct for storing the three parts of a Hoare Triple
 pub struct Triple {
@@ -58,8 +59,8 @@ impl fmt::Display for Triple {
 /// Creates a new `Triple` using the Rule of Composition [1].
 ///
 /// # Arguments
-/// * `left` - The Triple executed first.
-/// * `right` - The Triple executed after `left`.
+/// * `left` - The `Triple` executed first.
+/// * `right` - The `Triple` executed after `left`.
 ///
 /// # Returns
 /// A `Triple` instance with the Rule of Composition applied on `left` and `right`.
@@ -83,8 +84,8 @@ pub fn composition_rule(left: &Triple, right: &Triple) -> Triple {
 /// Creates a new `Triple` using the Condition Rule [2].
 ///
 /// # Arguments
-/// * `left` - The Triple with the unnegated condition.
-/// * `right` - The Triple with the negated condition.
+/// * `left` - The `Triple` with the unnegated condition.
+/// * `right` - The `Triple` with the negated condition.
 ///
 /// # Returns
 /// A `Triple` instance with the Condition Rule applied on `left` and `right`.
@@ -110,6 +111,21 @@ pub fn condition_rule(left: &Triple, right: &Triple) -> Triple {
     )
 }
 
+/// Creates a new `Triple` using the Consequence Rule [3].
+///
+/// # Arguments
+/// * `left` - The `Formula` that strengthen/weaken the precondition.
+/// * `middle` - The `Triple` which the Consequence Rule is applied on.
+/// * `right` - The `Formula` that strengthen/weaken the postcondition.
+///
+/// # Returns
+/// A `Triple` instance with the Consequence Rule applied according to `left` and `right`.
+///
+/// # Example
+/// ```
+/// println!("Hello, World!");
+/// ```
+/// [3]: https://en.wikipedia.org/wiki/Hoare_logic#Consequence_rule
 pub fn consequence_rule(left: &Formula, middle: &Triple, right: &Formula) -> Triple {
     Triple::new(
         format!("{}", left.get_info()[1]),
@@ -117,7 +133,19 @@ pub fn consequence_rule(left: &Formula, middle: &Triple, right: &Formula) -> Tri
         format!("{}", right.get_info()[2]),
     )
 }
-
+/// Creates a new `Triple` using the While Rule [4].
+///
+/// # Arguments
+/// * `input` - The `Triple` contains the loop invariant and loop condition.
+///
+/// # Returns 
+/// A `Triple` instance with the While Rule applied to the `input`.
+///
+/// # Example
+/// ```
+/// println!("Hello, World!");
+/// ```
+/// [4]: https://en.wikipedia.org/wiki/Hoare_logic#While_rule
 pub fn while_rule(input: &Triple) -> Triple {
     Triple::new(
         input.postcondition.to_string(),
