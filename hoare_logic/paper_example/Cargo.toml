@@ -1,0 +1,12 @@
+[package]
+name = "paper_example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hoare_triple = {path = "../hoare_triple"}
+first_order = {path = "../first_order"}
+
+[[bin]]
+name = "paper_example"
+path = "src/main.rs"

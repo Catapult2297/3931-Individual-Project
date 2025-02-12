@@ -79,9 +79,9 @@ pub fn composition_rule(left: &Triple, right: &Triple) -> Triple {
         panic!("The input triples do not have matching midcondition\nleft postcondition: {:?}, right precondition: {:?}",left.postcondition.to_string(), right.precondition.to_string())
     }
     Triple::new(
-        left.precondition.to_prefix_notation(),
-        format!("{}{}{}", left.command, "; ", right.command),
-        right.postcondition.to_prefix_notation(),
+        left.precondition.to_string(),
+        format!("{}{}{}", left.command, ";", right.command),
+        right.postcondition.to_string(),
     )
 }
 
@@ -130,7 +130,7 @@ pub fn condition_rule(left: &Triple, right: &Triple) -> Triple {
             left.command,
             right.command,
         ),
-        left.postcondition.to_prefix_notation(),
+        left.postcondition.to_string(),
     )
 }
 

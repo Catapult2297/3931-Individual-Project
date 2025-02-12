@@ -1,0 +1,9 @@
+[package]
+name = "hoare_triple"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+first_order = {path = "../first_order"}
+
+[lib]

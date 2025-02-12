@@ -1,6 +1,12 @@
 [package]
-name = "hoare_logic"
+name = "Hoare-Logic"
 version = "0.1.0"
-edition = "2021"
+authors = ["Wing-Fung Choy <sc21wfc@leeds.ac.uk>",]
+resolver = "2"
 
-[dependencies]
+[workspace]
+members = ["first_order", "hoare_triple", "paper_example"] 
+
+[workspace.dependencies]
+first_order = "first_order/"
+hoare_triple = "hoare_triple/"
