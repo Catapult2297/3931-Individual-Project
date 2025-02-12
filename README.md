@@ -1,16 +1,15 @@
-# Basic Rust Code Logic Analyser
+# Hoare Logic Proof Assistance
 
 ## Overview
-The Rust Code Logic Analyser is a tool designed to analyse Rust programmes for logical errors and assist programmers during development.
-This analyser will focus specifically on basic data types and control flow, rather than attempting to fully verify large codebases.
+Hoare Logic Proof Assistance is a tool designed to analyse programmes for logical errors and assist programmers during development.
+This proof assistance will focus specifically on basic data types and control flow, rather than attempting to fully verify large codebases.
 The goal is to provide useful insights that help developers catch common issues early in the development process.
 
 ## Features
 
-- **Code Parsing**: Parses Rust source code into an abstract syntax tree (AST).
-- **Logical Analysis**: Identifies common logical errors, such as uninitialized variables and incorrect conditionals.
-- **Automated Verification**: Integrates formal verification techniques to ensure code correctness.
-- **Reporting**: Generates reports detailing findings and suggestions.
+- **First-Order Logic**: Parses Fist-Order Logic as precondition and postcondition.
+- **Hoare Logic Rules**: Builds Hoare Triple for deduction.
+- **Verification**: Integrates formal verification techniques and allows human expert to ensure code correctness.
 
 ## Requirements
 
@@ -29,8 +28,6 @@ The goal is to provide useful insights that help developers catch common issues 
    ```
 ## Acknowledgments
 - [Rust Language](https://www.rust-lang.org/)
-- [syn](https://crates.io/crates/syn) for parsing Rust code
-- [serde](https://crates.io/crates/serde) for serialization 
 
 ## Contact
 For questions or feedback, please contact sc21wfc@leeds.ac.uk.
