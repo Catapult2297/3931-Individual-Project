@@ -12,22 +12,26 @@ enum ProofLine {
     Triple(Triple),
 }
 
-fn trace_level(level: u32) -> String {
-    let (trace, file, line) = (Backtrace::new(), file!(), line!());
+fn trace() -> String {
+    let level: usize = 1;
+    let (trace, current_file, current_line) = (Backtrace::new(), file!(), line!());
     let frames: &[BacktraceFrame] = trace.frames();
 
-    let sym = frames
+    let symbol = frames
         .iter()
         .flat_map(BacktraceFrame::symbols)
         .skip_while(|s| {
-            s.filename().map(|p| !p.ends_with(file)).unwrap_or(true) || s.lineno() != Some(line)
+            s.filename()
+                .map(|p| !p.ends_with(current_file))
+                .unwrap_or(true)
+                || s.lineno() != Some(current_line)
         })
         .nth(1 + level as usize)
         .cloned();
     format!(
         "{:?}:{}",
-        sym.as_ref().and_then(BacktraceSymbol::filename).unwrap(),
-        sym.as_ref().and_then(BacktraceSymbol::lineno).unwrap()
+        symbol.as_ref().and_then(BacktraceSymbol::filename).unwrap(),
+        symbol.as_ref().and_then(BacktraceSymbol::lineno).unwrap()
     )
 }
 
@@ -37,7 +41,7 @@ impl ProofLine {
             Ok(triple) => Self::Triple(triple),
             Err(err) => {
                 //let backtrace = Backtrace::new();
-                panic!("Error at {}.\n{err}", trace_level(1))
+                panic!("Error at {}.\n{err}", trace())
             }
         }
     }
@@ -46,7 +50,7 @@ impl ProofLine {
             ProofLine::Formula(formula) => &formula,
             _ => panic!(
                 "Error at {}.\nAttempt to access Formula from a non-Formula ProofLine",
-                trace_level(1)
+                trace()
             ),
         }
     }
@@ -56,7 +60,7 @@ impl ProofLine {
             ProofLine::Triple(triple) => &triple,
             _ => panic!(
                 "Error at {}.\nAttempt to access Triple from a non-Triple ProofLine",
-                trace_level(1)
+                trace()
             ),
         }
     }
