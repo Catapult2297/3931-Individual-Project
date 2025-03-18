@@ -17,6 +17,7 @@ use first_order::Formula;
 //use crate::first_order::Formula;
 
 /// A struct for storing the three parts of a Hoare Triple
+#[derive(Debug)]
 pub struct Triple {
     precondition: Formula,
     command: String,
@@ -74,15 +75,16 @@ impl fmt::Display for Triple {
 /// println!("{triple3}"); // Output: {(⊤=⊤)} x≔5;y≔x+1 {(y=6)}
 /// ```
 /// [1]: https://en.wikipedia.org/wiki/Hoare_logic#Rule_of_composition
-pub fn composition_rule(left: &Triple, right: &Triple) -> Triple {
+pub fn composition_rule(left: &Triple, right: &Triple) -> Result<Triple, String> {
     if left.postcondition.to_string() != right.precondition.to_string() {
-        panic!("The input triples do not have matching midcondition\nleft postcondition: {:?}, right precondition: {:?}",left.postcondition.to_string(), right.precondition.to_string())
+        return Err(
+        format!("The input triples do not have matching midcondition\nleft postcondition: {:?}, right precondition: {:?}",left.postcondition, right.precondition));
     }
-    Triple::new(
-        left.precondition.to_string(),
+    Ok(Triple::new(
+        left.precondition.to_prefix_notation(),
         format!("{}{}{}", left.command, ";", right.command),
-        right.postcondition.to_string(),
-    )
+        right.postcondition.to_prefix_notation(),
+    ))
 }
 
 /// Creates a new `Triple` using the Condition Rule [2].
@@ -102,13 +104,15 @@ pub fn composition_rule(left: &Triple, right: &Triple) -> Triple {
 /// println!("{triple3}"); // Output: {(⊤=⊤)} x≔5;y≔x+1 {(y=6)}
 /// ```
 /// [2]: https://en.wikipedia.org/wiki/Hoare_logic#Conditional_rule
-pub fn condition_rule(left: &Triple, right: &Triple) -> Triple {
+pub fn condition_rule(left: &Triple, right: &Triple) -> Result<Triple, String> {
     let negated_condition = &mut right.precondition.get_info()[1];
     negated_condition.replace_range(..3, "");
     if left.precondition.get_info()[0] != "Conjunction"
         || right.precondition.get_info()[0] != "Conjunction"
     {
-        panic!("The input triples do not have `Conjunction` formulae as precondition")
+        return Err(format!(
+            "The input triples do not have `Conjunction` formulae as precondition"
+        ));
     } else if left.precondition.get_info()[1] != *negated_condition {
         panic!(
             "The input triples do not matched negated {:?} and unnegated {:?} conditions",
@@ -118,11 +122,10 @@ pub fn condition_rule(left: &Triple, right: &Triple) -> Triple {
     } else if left.postcondition.to_string() != right.postcondition.to_string() {
         panic!(
             "The input triples do not have identical postconditions\nleft: {:?}, right: {:?}",
-            left.postcondition.to_string(),
-            right.postcondition.to_string()
+            left.postcondition, right.postcondition
         )
     }
-    Triple::new(
+    Ok(Triple::new(
         format!("{}", left.precondition.get_info()[2]),
         format!(
             "if {} then {} else {} endif",
@@ -131,7 +134,7 @@ pub fn condition_rule(left: &Triple, right: &Triple) -> Triple {
             right.command,
         ),
         left.postcondition.to_string(),
-    )
+    ))
 }
 
 /// Creates a new `Triple` using the Consequence Rule [3].
@@ -149,25 +152,29 @@ pub fn condition_rule(left: &Triple, right: &Triple) -> Triple {
 /// println!("Hello, World!");
 /// ```
 /// [3]: https://en.wikipedia.org/wiki/Hoare_logic#Consequence_rule
-pub fn consequence_rule(left: &Formula, middle: &Triple, right: &Formula) -> Triple {
+pub fn consequence_rule(
+    left: &Formula,
+    middle: &Triple,
+    right: &Formula,
+) -> Result<Triple, String> {
     if left.get_info()[2] != middle.precondition.to_prefix_notation() {
-        panic!(
+        return Err(format!(
             "The left `Formula` {:?} does not match middle `Triple` {:?}",
             left.get_info()[2],
             middle.precondition.to_prefix_notation()
-        );
+        ));
     } else if right.get_info()[1] != middle.postcondition.to_prefix_notation() {
-        panic!(
+        return Err(format!(
             "The right `Formula` {:?} does not match middle `Triple` {:?}",
             right.get_info()[1],
             middle.postcondition.to_prefix_notation()
-        );
+        ));
     }
-    Triple::new(
+    Ok(Triple::new(
         format!("{}", left.get_info()[1]),
         format!("{}", middle.command),
         format!("{}", right.get_info()[2]),
-    )
+    ))
 }
 /// Creates a new `Triple` using the While Rule [4].
 ///
@@ -182,19 +189,18 @@ pub fn consequence_rule(left: &Formula, middle: &Triple, right: &Formula) -> Tri
 /// println!("Hello, World!");
 /// ```
 /// [4]: https://en.wikipedia.org/wiki/Hoare_logic#While_rule
-pub fn while_rule(input: &Triple) -> Triple {
+pub fn while_rule(input: &Triple) -> Result<Triple, String> {
     if input.precondition.get_info()[1] != input.postcondition.to_prefix_notation() {
-        panic!(
+        return Err(format!(
             "The loop invariant is not preserved\nprecondition: {}, postcondition: {}",
-            input.precondition.to_string(),
-            input.postcondition.to_string()
-        )
+            input.precondition, input.postcondition
+        ));
     }
-    Triple::new(
+    Ok(Triple::new(
         input.postcondition.to_prefix_notation(),
         format!(
             "while {} do {} done",
-            Formula::new(&input.precondition.get_info()[2]).to_string(),
+            Formula::new(&input.precondition.get_info()[2]),
             input.command
         ),
         format!(
@@ -202,7 +208,7 @@ pub fn while_rule(input: &Triple) -> Triple {
             input.precondition.get_info()[2],
             input.postcondition.to_prefix_notation()
         ),
-    )
+    ))
 }
 
 fn main() {
@@ -211,15 +217,15 @@ fn main() {
     let cond1: Triple = Triple::new("∧ B P", "S", "Q");
     let cond2: Triple = Triple::new("∧ ¬ B P", "T", "Q");
     let whil: Triple = Triple::new("∧ B P", "S", "P");
-    println!("{}", composition_rule(&comp1, &comp2));
-    println!("{}", condition_rule(&cond1, &cond2));
+    println!("{:?}", composition_rule(&comp1, &comp2));
+    println!("{:?}", condition_rule(&cond1, &cond2));
     println!(
-        "{}",
+        "{:?}",
         consequence_rule(
             &Formula::new("→ P1 P2"),
             &Triple::new("P2", "S", "Q2"),
             &Formula::new("→ Q2 Q1")
         )
     );
-    println!("{}", while_rule(&whil));
+    println!("{:?}", while_rule(&whil));
 }

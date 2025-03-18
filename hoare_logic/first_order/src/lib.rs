@@ -91,7 +91,7 @@ impl Formula {
     /// let formula1: Formula = Formula::new("∃ a → b ∧ c a");
     /// println!("{}", formula1.to_prefix_notation()); // Output: ∃ a → b ∧ c a
     /// ```
-    fn to_prefix_notation(&self) -> String {
+    pub fn to_prefix_notation(&self) -> String {
         match self {
             Formula::Term(ref s) => format!("{s}"),
             Formula::Negation(ref formula) => format!("¬ {}", formula.to_prefix_notation()),
@@ -140,7 +140,7 @@ impl Formula {
     ///let formula1: Formula = Formula::new("∃ a → b ∧ c a");
     ///println!("{}", formula1.to_prefix_notation()); // Output: (∃a)((b→(c∧a)))
     /// ```
-    fn to_infix_notation(&self) -> String {
+    pub fn to_infix_notation(&self) -> String {
         match self {
             Formula::Term(ref s) => format!("{s}"),
             Formula::Negation(ref formula) => format!("¬({})", formula.to_infix_notation()),
