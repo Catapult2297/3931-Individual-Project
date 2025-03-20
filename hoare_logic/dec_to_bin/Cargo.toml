@@ -1,5 +1,5 @@
 [package]
-name = "paper_example"
+name = "dec_to_bin"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,5 +10,5 @@ proof_line = {path = "../proof_line"}
 backtrace = "0.3.74"
 
 [[bin]]
-name = "paper_example"
+name = "dec_to_bin"
 path = "src/main.rs"

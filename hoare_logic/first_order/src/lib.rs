@@ -1,6 +1,6 @@
 //! # First Order Logic Formulae implementation in Rust
 //!
-//! This module provides an implementation of logical formulaes using an enum `Formula`.
+//! This module provides an implementation of logical formulae using an enum `Formula`.
 //! It supports the following logical operations:
 //! - Negation ¬
 //! - Conjunction ∧
@@ -133,7 +133,7 @@ impl Formula {
     /// Converts the formula itself infix notation.
     ///
     /// # Returns
-    /// A `String` representing the formuila in infix notation
+    /// A `String` representing the formula in infix notation
     ///
     /// # Examples
     /// ```

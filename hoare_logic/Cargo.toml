@@ -5,8 +5,9 @@ authors = ["Wing-Fung Choy <sc21wfc@leeds.ac.uk>",]
 resolver = "2"
 
 [workspace]
-members = ["first_order", "hoare_triple", "paper_example"] 
+members = ["dec_to_bin","first_order", "hoare_triple", "paper_example", "proof_line"] 
 
 [workspace.dependencies]
 first_order = "first_order/"
 hoare_triple = "hoare_triple/"
+proof_line = "proof_line/"
