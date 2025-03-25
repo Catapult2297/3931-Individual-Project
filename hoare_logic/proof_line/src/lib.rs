@@ -1,6 +1,6 @@
 use backtrace::{Backtrace, BacktraceFrame, BacktraceSymbol};
 use first_order::Formula;
-use hoare_triple::{composition_rule, consequence_rule, while_rule, Triple};
+use hoare_triple::Triple;
 use std::fmt;
 
 pub enum ProofLine {

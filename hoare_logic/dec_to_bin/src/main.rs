@@ -1,5 +1,5 @@
 use first_order::Formula;
-use hoare_triple::{composition_rule, consequence_rule, while_rule, Triple};
+use hoare_triple::{composition_rule, while_rule, Triple};
 use proof_line::ProofLine;
 
 ///Reference Code
@@ -9,12 +9,14 @@ use proof_line::ProofLine;
 ///    let mut input: u32 = input;
 ///    let mut power: u32 = 0;
 ///    let mut output: u32 = 0;
+///    if input == 0 {
+///        return 0;
+///    }
 ///    while input != 0 {
 ///        let remainder = input % 2;
 ///        input = input / 2;
 ///        output += remainder * (10 as u32).pow(power);
 ///        power += 1;
-///        println!("{input}: {power}")
 ///    }
 ///    output
 ///}

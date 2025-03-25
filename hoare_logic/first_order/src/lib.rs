@@ -57,6 +57,24 @@ pub enum Formula {
     /// A `ExistentialQuantifier` `Formula` takes a form `∃ x φ` where `φ` is a formula and `x` is a variable.
     ExistentialQuantifier(String, Box<Formula>), // THERE EXIST
 }
+impl fmt::Display for Formula {
+    /// Formats the formula in infix notation for display.
+    ///
+    /// This implementation of the `Display` trait allows for easy printing of
+    /// `Formula` instances. When a formula is used as a `print` macro's input, it will
+    /// be represented in infix notation, which is more familiar and readable
+    /// for users who are accustomed to standard mathematical expressions.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let formula1: Formula = Formula::new("∃ a → b ∧ c a")
+    /// println!("{formula}"); // Output: (∃a)((b→(c∧a)))
+    /// ```
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_infix_notation())
+    }
+}
 
 impl Formula {
     /// Creates a new `Formula` from a string input.
@@ -79,7 +97,10 @@ impl Formula {
             .map(String::from)
             .collect::<Vec<_>>();
         let mut parser: Parser<'_> = Parser::new(&tokens);
-        parser.parse()
+        match parser.parse() {
+            Ok(formula) => formula,
+            Err(_) => panic!("The input {input_str} is malformed."),
+        }
     }
     /// Converts the formula itself prefix notation.
     ///
@@ -227,26 +248,12 @@ impl Formula {
     }
 }
 
-impl fmt::Display for Formula {
-    /// Formats the formula in infix notation for display.
-    ///
-    /// This implementation of the `Display` trait allows for easy printing of
-    /// `Formula` instances. When a formula is used as a `print` macro's input, it will
-    /// be represented in infix notation, which is more familiar and readable
-    /// for users who are accustomed to standard mathematical expressions.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let formula1: Formula = Formula::new("∃ a → b ∧ c a")
-    /// println!("{formula}"); // Output: (∃a)((b→(c∧a)))
-    /// ```
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.to_infix_notation())
-    }
+/// A struct for parsing logical formulae from a sequence of tokens.
+#[derive(Debug)]
+enum ParseError {
+    MalformedInput,
 }
 
-/// A struct for parsing logical formulae from a sequence of tokens.
 struct Parser<'a> {
     tokens: &'a [String], // A slice of tokens representing the logical formula.
     current: usize,       // The current index in the token slice.
@@ -256,56 +263,70 @@ impl<'a> Parser<'a> {
     fn new(tokens: &'a [String]) -> Self {
         Parser { tokens, current: 0 }
     }
-    fn parse(&mut self) -> Formula {
+
+    fn parse(&mut self) -> Result<Formula, ParseError> {
         self.parse_formula()
     }
-    fn parse_formula(&mut self) -> Formula {
+
+    fn parse_formula(&mut self) -> Result<Formula, ParseError> {
+        if self.current == self.tokens.len() {
+            return Err(ParseError::MalformedInput);
+        }
+
         let token: &String = &self.tokens[self.current];
         self.current += 1;
 
         match token.as_str() {
             "¬" => {
-                let inner: Formula = self.parse_formula();
-                Formula::Negation(Box::new(inner))
+                let inner = self.parse_formula()?;
+                Ok(Formula::Negation(Box::new(inner)))
             }
             "∧" => {
-                let left: Formula = self.parse_formula();
-                let right: Formula = self.parse_formula();
-                Formula::Conjunction(Box::new(left), Box::new(right))
+                let left = self.parse_formula()?;
+                let right = self.parse_formula()?;
+                Ok(Formula::Conjunction(Box::new(left), Box::new(right)))
             }
             "∨" => {
-                let left: Formula = self.parse_formula();
-                let right: Formula = self.parse_formula();
-                Formula::Disjunction(Box::new(left), Box::new(right))
+                let left = self.parse_formula()?;
+                let right = self.parse_formula()?;
+                Ok(Formula::Disjunction(Box::new(left), Box::new(right)))
             }
             "→" => {
-                let left: Formula = self.parse_formula();
-                let right: Formula = self.parse_formula();
-                Formula::Implication(Box::new(left), Box::new(right))
+                let left = self.parse_formula()?;
+                let right = self.parse_formula()?;
+                Ok(Formula::Implication(Box::new(left), Box::new(right)))
             }
             "∀" => {
-                let var: String = self.tokens[self.current].clone();
+                let var = self
+                    .tokens
+                    .get(self.current)
+                    .ok_or(ParseError::MalformedInput)?
+                    .clone();
                 self.current += 1;
-                let inner: Formula = self.parse_formula();
-                Formula::UniversalQuantifier(var, Box::new(inner))
+                let inner = self.parse_formula()?;
+                Ok(Formula::UniversalQuantifier(var, Box::new(inner)))
             }
             "∃" => {
-                let var: String = self.tokens[self.current].clone();
+                let var = self
+                    .tokens
+                    .get(self.current)
+                    .ok_or(ParseError::MalformedInput)?
+                    .clone();
                 self.current += 1;
-                let inner: Formula = self.parse_formula();
-                Formula::ExistentialQuantifier(var, Box::new(inner))
+                let inner = self.parse_formula()?;
+                Ok(Formula::ExistentialQuantifier(var, Box::new(inner)))
             }
             "=" => {
-                let left: Formula = self.parse_formula();
-                let right: Formula = self.parse_formula();
-                Formula::Equivalence(Box::new(left), Box::new(right))
+                let left = self.parse_formula()?;
+                let right = self.parse_formula()?;
+                Ok(Formula::Equivalence(Box::new(left), Box::new(right)))
             }
             "<" => {
-                let left: Formula = self.parse_formula();
-                let right: Formula = self.parse_formula();
-                Formula::LessThan(Box::new(left), Box::new(right))
+                let left = self.parse_formula()?;
+                let right = self.parse_formula()?;
+                Ok(Formula::LessThan(Box::new(left), Box::new(right)))
             }
-            _ => Formula::Term(token.clone()), // Atomic proposition
+            _ => Ok(Formula::Term(token.clone())), // Atomic proposition
         }
     }
 }
