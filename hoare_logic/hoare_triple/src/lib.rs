@@ -193,7 +193,7 @@ pub fn while_rule(input: &Triple) -> Result<Triple, String> {
     if input.precondition.get_info()[1] != input.postcondition.to_prefix_notation() {
         return Err(format!(
             "The loop invariant is not preserved\nprecondition invariant: {}, postcondition invariant: {}",
-            input.precondition.get_info()[1], input.postcondition
+            Formula::new(&input.precondition.get_info()[1]), input.postcondition
         ));
     }
     Ok(Triple::new(

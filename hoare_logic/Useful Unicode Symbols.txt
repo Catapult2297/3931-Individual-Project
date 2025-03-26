@@ -1,0 +1,7 @@
+\top          ⊤
+\bot          ⊥
+\neg          ¬
+\wedge        ∧
+\vee          ∨
+\rightarrow   →
+\coloneq      ≔
