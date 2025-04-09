@@ -1,8 +1,0 @@
-[package]
-name = "ast"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-syn = {version = "2.0", features = ["parsing", "full", "extra-traits"]}
-quote = "1.0.37"

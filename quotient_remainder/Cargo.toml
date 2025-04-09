@@ -1,0 +1,14 @@
+[package]
+name = "quotient_remainder"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+hoare_triple = {path = "../hoare_triple"}
+first_order = {path = "../first_order"}
+proof_line = {path = "../proof_line"}
+backtrace = "0.3.74"
+
+[[bin]]
+name = "quotient_remainder"
+path = "src/main.rs"

@@ -1,9 +1,0 @@
-[package]
-name = "proof_line"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-hoare_triple = {path = "../hoare_triple"}
-first_order = {path = "../first_order"}
-backtrace = "0.3.74"

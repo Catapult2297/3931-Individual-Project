@@ -1,0 +1,14 @@
+[package]
+name = "Hoare-Logic"
+version = "0.1.0"
+authors = ["Wing-Fung Choy <sc21wfc@leeds.ac.uk>",]
+resolver = "2"
+edition = "2024"
+
+[workspace]
+members = ["dec_to_bin", "euclidean","first_order", "hoare_triple", "quotient_remainder", "proof_line", "factorial", "fibonacci", "tmp"]
+
+[workspace.dependencies]
+first_order = "first_order/"
+hoare_triple = "hoare_triple/"
+proof_line = "proof_line/"
