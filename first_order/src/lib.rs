@@ -11,7 +11,6 @@
 //! - Universal Quantifier ∀
 //! - Existential Quantifier ∃
 #![warn(missing_docs)]
-#[allow(dead_code)]
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -53,9 +52,9 @@ pub enum Formula {
     /// A `LessThan` `Formula` takes a form `< φ ψ` where `φ` and `ψ` are formulae.
     LessThan(Box<Formula>, Box<Formula>),
     /// A `UniversalQuantifier` `Formula` takes a form `∀ x φ` where `φ` is a formula and `x` is a variable.
-    UniversalQuantifier(String, Box<Formula>), // FOR ALL
+    UniversalQuantifier(String, Box<Formula>),
     /// A `ExistentialQuantifier` `Formula` takes a form `∃ x φ` where `φ` is a formula and `x` is a variable.
-    ExistentialQuantifier(String, Box<Formula>), // THERE EXIST
+    ExistentialQuantifier(String, Box<Formula>),
 }
 impl fmt::Display for Formula {
     /// Formats the formula in infix notation for display.
@@ -69,6 +68,7 @@ impl fmt::Display for Formula {
     ///
     /// ```
     /// use first_order::Formula;
+    /// // Create a formula using the new function
     /// let test_formula: Formula = Formula::new("∧ ∀ x → P(x) ∧ Q(x) ∃ y ∨ R(y) S(y) = ¬ T(x) < U V");
     /// assert_eq!(
     ///     format!("{test_formula}"),
@@ -89,10 +89,17 @@ impl Formula {
     /// # Returns
     /// A `Formula` instance representing the parsed logical formula.
     ///
+    /// # Panics
+    /// This function will panic if the input string is malformed or cannot be parsed into a valid `Formula`.
+    ///
     /// # Example
     /// ```
     /// use first_order::Formula;
+    ///
+    /// // Create a formula using the new function
     /// let test_formula: Formula = Formula::new("∧ ∀ x → P(x) ∧ Q(x) ∃ y ∨ R(y) S(y) = ¬ T(x) < U V");
+    ///
+    /// // Expected result constructed manually for comparison
     /// let result: Formula = Formula::Conjunction(
     ///     Box::new(Formula::UniversalQuantifier(
     ///         "x".to_string(),
@@ -135,6 +142,9 @@ impl Formula {
         }
     }
     /// Converts the formula itself prefix notation.
+    ///
+    /// This method returns a string representation of the formula in prefix notation,
+    /// which is a way of writing logical expressions where the operator precedes its operands.
     ///
     /// # Returns
     /// A `String` representing the formula in prefix notation
@@ -189,6 +199,11 @@ impl Formula {
     }
     /// Converts the formula itself infix notation.
     ///
+    /// This method returns a string representation of the formula in infix notation,
+    /// which is a way of writing logical expressions where operators are placed between
+    /// their operands. This format is commonly used in mathematical expressions and is
+    /// more familiar to users.
+    ///
     /// # Returns
     /// A `String` representing the formula in infix notation
     ///
@@ -231,10 +246,10 @@ impl Formula {
     /// Retrieves information about the formula in an array format
     ///
     /// # Returns
-    /// An array `[String; 3]` contains the following information:
+    /// Returns an array of three `String` values containing the following information:
     /// - Position 0: The type of the formula.
     /// - Position 1: The first argument of the formula.
-    /// - Position 2: the second argument of the formula. If the formula is a term. The function will return an empty "" `String`.
+    /// - Position 2: the second argument of the formula. If the formula is a term. The function will return an empty  `String`.
     ///
     /// # Examples
     /// ```

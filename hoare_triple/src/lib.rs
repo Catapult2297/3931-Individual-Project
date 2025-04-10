@@ -8,19 +8,48 @@
 //! - Condition Rule
 //! - Consequence Rule
 //! - While Rule
-#![warn(missing_docs)]
-#[allow(dead_code)]
-use std::fmt;
-//mod first_order;
 use first_order::Formula;
+use std::fmt;
 
 //use crate::first_order::Formula;
 
-/// A struct for storing the three parts of a Hoare Triple
-#[derive(Debug)]
+/// Represents a Hoare triple, which is a formalism used in computer science to reason about the correctness
+/// of computer programs.
+///
+/// A `Triple` consists of a precondition, a command (or program statement), and a postcondition.
+/// It is typically expressed in the form `{ P } C { Q }`, where:
+/// - `P` is the precondition that must hold true before executing the command `C`.
+/// - `C` is the command or program statement being executed.
+/// - `Q` is the postcondition that must hold true after executing the command, assuming the precondition was true.
+///
+/// # Fields
+/// * `precondition` - A `Formula` representing the condition before executing the command.
+/// * `command` - A `String` representing the command or program statement to be executed.
+/// * `postcondition` - A `Formula` representing the condition after executing the command,
+///   given that the precondition was true.
+///
+/// # Example
+/// ```
+/// use first_order::Formula;
+/// use hoare_triple::Triple;
+///
+/// let precondition: Formula = Formula::new("P");
+/// let command: String = "x≔x+1".to_string();
+/// let postcondition = Formula::new("P");
+///
+/// let triple: Triple = Triple {
+///     precondition,
+///     command,
+///     postcondition,
+/// };
+/// ```
+#[derive(Debug, PartialEq)]
 pub struct Triple {
+    /// A `Formula` representing the precondition before executing the command.
     pub precondition: Formula,
+    /// A `String` representing the command or program statement to be executed.
     pub command: String,
+    /// A `Formula` representing the postcondition after executing the command.
     pub postcondition: Formula,
 }
 
@@ -28,18 +57,37 @@ impl Triple {
     /// Creates a new `Triple` from three string input.
     ///
     /// # Arguments
-    /// * `precondition` - A `String` or `&str` that represents the logical formula in prefix notation. Every atomic propositions, logical connectives, and logical quantifiers must be separated using a whitespace.
+    /// * `precondition` - A `String` or `&str` that represents the logical formula in prefix notation.
+    ///   Every atomic propositions, logical connectives, and logical quantifiers must be separated using a whitespace.
     /// * `command` - A `String` or `&str` that represents the command of the Triple.
-    /// * `precondition` - A `String` or `&str` that represents the logical formula in prefix notation. Every atomic propositions, logical connectives, and logical quantifiers must be separated using a whitespace.
+    /// * `postcondition` - A `String` or `&str` that represents the logical formula in prefix notation.
+    ///   Similar to `precondition`, every atomic propositions, logical connectives, and logical quantifiers must be separated using a whitespace.
+    ///
+    /// # Type Requirements
+    /// All arguments must be of the same type `T` (either `String` or `&str`). The function will convert them into `String` to ensure consistency. Ensure that the types match to avoid compilation errors.
     ///
     /// # Returns
     /// A `Triple` instance representing the parsed input.
     ///
     /// # Example
     /// ```
-    /// let triple1: Triple = Triple::new("= ⊤ ⊤", "x≔5", "= x 5");
-    /// println!("{triple1}"); // Output: {(⊤=⊤)} x≔5 {(x=5)}
+    /// use first_order::Formula;
+    /// use hoare_triple::Triple;
+    ///
+    /// let test_triple: Triple = Triple::new(
+    ///     "∧ ∀ x → P(x) ∧ Q(x) ∃ y ∨ R(y) S(y) = ¬ T(x) < U V",
+    ///     "x≔z",
+    ///     "∧ ∀ z → P(z) ∧ Q(z) ∃ y ∨ R(y) S(y) = ¬ T(z) < U V",
+    /// );
+    /// let result: Triple = Triple {
+    ///     precondition: Formula::new("∧ ∀ x → P(x) ∧ Q(x) ∃ y ∨ R(y) S(y) = ¬ T(x) < U V"),
+    ///     command: "x≔z".to_string(),
+    ///     postcondition: Formula::new("∧ ∀ z → P(z) ∧ Q(z) ∃ y ∨ R(y) S(y) = ¬ T(z) < U V"),
+    /// };
+    /// assert_eq!(test_triple, result);
     /// ```
+    /// # Note
+    /// Ensure that the input strings are formatted correctly to avoid potential parsing errors.
     pub fn new<T: Into<String>>(precondition: T, command: T, postcondition: T) -> Triple {
         Triple {
             precondition: Formula::new(precondition),
@@ -60,25 +108,35 @@ impl fmt::Display for Triple {
 }
 /// Creates a new `Triple` using the Rule of Composition [1].
 ///
+/// This function applies the Rule of Composition to two `Triple` instances, `left` and `right`,
+/// by combining them according to the Rule of Composition. The precondition of the `right` `Triple`
+/// must match the postcondition of the `left` `Triple`, which is referred to as the midcondition.
+///
 /// # Arguments
-/// * `left` - The `Triple` executed first.
-/// * `right` - The `Triple` executed after `left`.
+/// * `left` - A reference to the `Triple` executed first.
+/// * `right` - A reference to the `Triple` executed after `left`.
 ///
 /// # Returns
-/// A `Triple` instance with the Rule of Composition applied on `left` and `right`.
+/// A `Result` containing a `Triple` instance with the Rule of Composition applied on `left` and `right`,
+/// or an error message if the midcondition does not match.
 ///
 /// # Example
 /// ```
-/// let triple1: Triple = Triple::new("= ⊤ ⊤", "x≔5", "= x 5");
-/// let triple2: Triple = Triple::new("= x 5", "y≔x+1", "= y 6");
-/// let triple3: Triple = composition_rule(&triple1, &triple2);
-/// println!("{triple3}"); // Output: {(⊤=⊤)} x≔5;y≔x+1 {(y=6)}
+/// use hoare_triple::{Triple, composition_rule};
+///
+/// let triple1: Triple = Triple::new("= x+1 43", "y≔x+1", "= y 43");
+/// let triple2: Triple = Triple::new("= y 43", "z≔y", "= z 43");
+/// let test_triple: Triple = composition_rule(&triple1, &triple2).unwrap();
+/// let result: Triple = Triple::new("= x+1 43", "y≔x+1;z≔y", "= z 43");
+/// assert_eq!(test_triple, result);
 /// ```
 /// [1]: https://en.wikipedia.org/wiki/Hoare_logic#Rule_of_composition
 pub fn composition_rule(left: &Triple, right: &Triple) -> Result<Triple, String> {
     if left.postcondition.to_string() != right.precondition.to_string() {
-        return Err(
-        format!("The input triples do not have matching midcondition\nleft postcondition: {:?}, right precondition: {:?}",left.postcondition, right.precondition));
+        return Err(format!(
+            "The input triples do not have matching midcondition\nleft postcondition: {:?}, right precondition: {:?}",
+            left.postcondition, right.precondition
+        ));
     }
     Ok(Triple::new(
         left.precondition.to_prefix_notation(),
@@ -89,19 +147,27 @@ pub fn composition_rule(left: &Triple, right: &Triple) -> Result<Triple, String>
 
 /// Creates a new `Triple` using the Condition Rule [2].
 ///
+/// This function applies the Condition Rule to two `Triple` instances, `left` and `right`.
+/// The `left` `Triple` must have an unnegated condition as the first value of its conjunction formula,
+/// while the `right` `Triple` must have the corresponding negated condition as the first value of its conjunction formula.
+///
 /// # Arguments
-/// * `left` - The `Triple` with the unnegated condition. The unnegated condition must be the first value of the conjunction formula.
-/// * `right` - The `Triple` with the negated condition. The negated condition must be the first value of the conjunction formula.
+/// * `left` - A reference to the `Triple` with the unnegated condition. The unnegated condition must be the first value of the conjunction formula.
+/// * `right` - A reference to the `Triple` with the negated condition. The negated condition must be the first value of the conjunction formula.
 ///
 /// # Returns
-/// A `Triple` instance with the Condition Rule applied on `left` and `right`.
+/// A `Result` containing a `Triple` instance with the Condition Rule applied on `left` and `right`,
+/// or an error message if the input is malformed (e.g., if the preconditions are not of the expected type).
 ///
 /// # Example
 /// ```
-/// let triple1: Triple = Triple::new("= ⊤ ⊤", "x≔5", "= x 5");
-/// let triple2: Triple = Triple::new("= x 5", "y≔x+1", "= y 6");
-/// let triple3: Triple = composition_rule(&triple1, &triple2);
-/// println!("{triple3}"); // Output: {(⊤=⊤)} x≔5;y≔x+1 {(y=6)}
+/// use hoare_triple::{Triple, condition_rule};
+///
+/// let triple1: Triple = Triple::new("∧ B P", "S", "Q");
+/// let triple2: Triple = Triple::new("∧ ¬ B P", "T", "Q");
+/// let test_triple: Triple = condition_rule(&triple1, &triple2).unwrap();
+/// let result = Triple::new("P", "if B then S else T endif", "Q");
+/// assert_eq!(test_triple, result);
 /// ```
 /// [2]: https://en.wikipedia.org/wiki/Hoare_logic#Conditional_rule
 pub fn condition_rule(left: &Triple, right: &Triple) -> Result<Triple, String> {
@@ -110,20 +176,20 @@ pub fn condition_rule(left: &Triple, right: &Triple) -> Result<Triple, String> {
     if left.precondition.get_info()[0] != "Conjunction"
         || right.precondition.get_info()[0] != "Conjunction"
     {
-        return Err(format!(
-            "The input triples do not have `Conjunction` formulae as precondition"
-        ));
+        return Err(
+            "The input triples do not have `Conjunction` formulae as precondition".to_string(),
+        );
     } else if left.precondition.get_info()[1] != *negated_condition {
-        panic!(
-            "The input triples do not matched negated {:?} and unnegated {:?} conditions",
+        return Err(format!(
+            "The input triples do not match negated {:?} and unnegated {:?} conditions",
             left.precondition.get_info()[1],
             negated_condition
-        )
+        ));
     } else if left.postcondition.to_string() != right.postcondition.to_string() {
-        panic!(
+        return Err(format!(
             "The input triples do not have identical postconditions\nleft: {:?}, right: {:?}",
             left.postcondition, right.postcondition
-        )
+        ));
     }
     Ok(Triple::new(
         format!("{}", left.precondition.get_info()[2]),
@@ -139,17 +205,29 @@ pub fn condition_rule(left: &Triple, right: &Triple) -> Result<Triple, String> {
 
 /// Creates a new `Triple` using the Consequence Rule [3].
 ///
+/// This function applies the Consequence Rule to a `Triple` instances, `middle`, using the `left` and `right` `Formula`.
+/// The `left` and `right` `Formula` must be type `Formula::Implication`, which strengthens or weakens the precondition and postcondition, respectively.
+///
 /// # Arguments
-/// * `left` - The `Formula` that strengthen/weaken the precondition.
-/// * `middle` - The `Triple` which the Consequence Rule is applied on.
-/// * `right` - The `Formula` that strengthen/weaken the postcondition.
+/// * `left` - A reference to the `Formula` that strengthens or weakens the precondition.
+/// * `middle` - A reference to the `Triple` which the Consequence Rule is applied on.
+/// * `right` - A reference to the `Formula` that strengthens or weakens the postcondition.
 ///
 /// # Returns
-/// A `Triple` instance with the Consequence Rule applied according to `left` and `right`.
+/// A `Result` containing a `Triple` instance with the Consequence Rule applied on `middle` using the `left` and `right` `Formula`,
+/// or a `String` error message if the input is malformed (e.g., if the `Formula` are not of the expected type).
 ///
 /// # Example
 /// ```
-/// println!("Hello, World!");
+/// use first_order::Formula;
+/// use hoare_triple::{Triple, consequence_rule};
+///
+/// let formula1: Formula = Formula::new("→ P1 P2");
+/// let formula2: Formula = Formula::new("→ Q2 Q1");
+/// let triple1: Triple = Triple::new("P2", "S", "Q2");
+/// let test_triple: Triple = consequence_rule(&formula1, &triple1, &formula2).unwrap();
+/// let result: Triple = Triple::new("P1", "S", "Q1");
+/// assert_eq!(test_triple, result);
 /// ```
 /// [3]: https://en.wikipedia.org/wiki/Hoare_logic#Consequence_rule
 pub fn consequence_rule(
@@ -159,25 +237,25 @@ pub fn consequence_rule(
 ) -> Result<Triple, String> {
     if left.get_info()[0] != "Implication" {
         return Err(format!(
-            "The left `Formula` {:?} is not an Implication type Formula. left type: {:?}",
+            "The left `Formula` {:?} is not an Implication type Formula. Left type: {:?}",
             left.to_prefix_notation(),
             left.get_info()[0]
         ));
     } else if right.get_info()[0] != "Implication" {
         return Err(format!(
-            "The right `Formula` {:?} is not an Implication type Formula. right type: {:?}",
+            "The right `Formula` {:?} is not an Implication type Formula. Right type: {:?}",
             right.to_prefix_notation(),
             right.get_info()[0]
         ));
     } else if left.get_info()[2] != middle.precondition.to_prefix_notation() {
         return Err(format!(
-            "The left `Formula` {:?} does not match middle `Triple` {:?}",
+            "The left `Formula` {:?} does not match the precondition of the middle `Triple` {:?}",
             left.get_info()[2],
             middle.precondition.to_prefix_notation()
         ));
     } else if right.get_info()[1] != middle.postcondition.to_prefix_notation() {
         return Err(format!(
-            "The right `Formula` {:?} does not match middle `Triple` {:?}",
+            "The right `Formula` {:?} does not match the postcondition of the middle `Triple` {:?}",
             right.get_info()[1],
             middle.postcondition.to_prefix_notation()
         ));
@@ -191,14 +269,20 @@ pub fn consequence_rule(
 /// Creates a new `Triple` using the While Rule [4].
 ///
 /// # Arguments
-/// * `input` - The `Triple` contains the loop invariant and loop condition.
+/// * `input` -  A reference to the `Triple` that contains the loop invariant and loop condition.
 ///
 /// # Returns
-/// A `Triple` instance with the While Rule applied to the `input`.
+/// A `Result` containing a `Triple` instance with the While Rule applied on `input`,
+/// or a `String` error message if the input is malformed (e.g., if the loop invariant is not conserved).
 ///
 /// # Example
 /// ```
-/// println!("Hello, World!");
+/// use hoare_triple::{Triple, while_rule};
+///
+/// let triple1: Triple = Triple::new("∧ P B", "S", "P");
+/// let test_triple: Triple = while_rule(&triple1).unwrap();
+/// let result: Triple = Triple::new("P", "while B do S done", "∧ ¬ B P");
+/// assert_eq!(test_triple, result);
 /// ```
 /// [4]: https://en.wikipedia.org/wiki/Hoare_logic#While_rule
 pub fn while_rule(input: &Triple) -> Result<Triple, String> {
@@ -222,23 +306,4 @@ pub fn while_rule(input: &Triple) -> Result<Triple, String> {
             input.postcondition.to_prefix_notation()
         ),
     ))
-}
-
-fn main() {
-    let comp1: Triple = Triple::new("P", "S", "Q");
-    let comp2: Triple = Triple::new("Q", "T", "R");
-    let cond1: Triple = Triple::new("∧ B P", "S", "Q");
-    let cond2: Triple = Triple::new("∧ ¬ B P", "T", "Q");
-    let whil: Triple = Triple::new("∧ B P", "S", "P");
-    println!("{:?}", composition_rule(&comp1, &comp2));
-    println!("{:?}", condition_rule(&cond1, &cond2));
-    println!(
-        "{:?}",
-        consequence_rule(
-            &Formula::new("→ P1 P2"),
-            &Triple::new("P2", "S", "Q2"),
-            &Formula::new("→ Q2 Q1")
-        )
-    );
-    println!("{:?}", while_rule(&whil));
 }
