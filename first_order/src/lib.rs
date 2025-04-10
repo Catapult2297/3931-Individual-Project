@@ -10,7 +10,6 @@
 //! - Less Than <
 //! - Universal Quantifier ∀
 //! - Existential Quantifier ∃
-#![warn(missing_docs)]
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
