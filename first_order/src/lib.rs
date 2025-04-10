@@ -392,3 +392,320 @@ impl<'a> Parser<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*; // Import the Formula enum and its methods
+
+    #[test]
+    fn test_valid_formula() {
+        let test_formula: Formula =
+            Formula::new("∧ ∀ x → P(x) ∧ Q(x) ∃ y ∨ R(y) S(y) = ¬ T(x) < U V");
+
+        let expected: Formula = Formula::Conjunction(
+            Box::new(Formula::UniversalQuantifier(
+                "x".to_string(),
+                Box::new(Formula::Implication(
+                    Box::new(Formula::Term("P(x)".to_string())),
+                    Box::new(Formula::Conjunction(
+                        Box::new(Formula::Term("Q(x)".to_string())),
+                        Box::new(Formula::ExistentialQuantifier(
+                            "y".to_string(),
+                            Box::new(Formula::Disjunction(
+                                Box::new(Formula::Term("R(y)".to_string())),
+                                Box::new(Formula::Term("S(y)".to_string())),
+                            )),
+                        )),
+                    )),
+                )),
+            )),
+            Box::new(Formula::Equivalence(
+                Box::new(Formula::Negation(Box::new(Formula::Term(
+                    "T(x)".to_string(),
+                )))),
+                Box::new(Formula::LessThan(
+                    Box::new(Formula::Term("U".to_string())),
+                    Box::new(Formula::Term("V".to_string())),
+                )),
+            )),
+        );
+
+        assert_eq!(test_formula, expected);
+    }
+
+    #[test]
+    #[should_panic(expected = "The input")]
+    fn test_malformed_formula_missing_token() {
+        // This input contains an unexpected token
+        Formula::new("∧ ∀ x → P(x) ∧ Q(x) ∃ y ∨ R(y) = T(x) < U V");
+    }
+
+    #[test]
+    #[should_panic(expected = "The input")]
+    fn test_malformed_formula_empty_input() {
+        // This input is empty
+        Formula::new("");
+    }
+
+    #[test]
+    fn test_valid_formula_with_terms() {
+        let test_formula: Formula = Formula::new("∃ x P(x)");
+
+        let expected: Formula = Formula::ExistentialQuantifier(
+            "x".to_string(),
+            Box::new(Formula::Term("P(x)".to_string())),
+        );
+
+        assert_eq!(test_formula, expected);
+    }
+
+    #[test]
+    fn test_valid_formula_with_negation() {
+        let test_formula: Formula = Formula::new("¬ P(x)");
+
+        let expected: Formula = Formula::Negation(Box::new(Formula::Term("P(x)".to_string())));
+
+        assert_eq!(test_formula, expected);
+    }
+
+    #[test]
+    fn test_term_to_prefix_notation() {
+        let formula = Formula::Term("P(x)".to_string());
+        assert_eq!(formula.to_prefix_notation(), "P(x)");
+    }
+
+    #[test]
+    fn test_negation_to_prefix_notation() {
+        let formula = Formula::Negation(Box::new(Formula::Term("P(x)".to_string())));
+        assert_eq!(formula.to_prefix_notation(), "¬ P(x)");
+    }
+
+    #[test]
+    fn test_conjunction_to_prefix_notation() {
+        let formula = Formula::Conjunction(
+            Box::new(Formula::Term("P(x)".to_string())),
+            Box::new(Formula::Term("Q(x)".to_string())),
+        );
+        assert_eq!(formula.to_prefix_notation(), "∧ P(x) Q(x)");
+    }
+
+    #[test]
+    fn test_disjunction_to_prefix_notation() {
+        let formula = Formula::Disjunction(
+            Box::new(Formula::Term("P(x)".to_string())),
+            Box::new(Formula::Term("Q(x)".to_string())),
+        );
+        assert_eq!(formula.to_prefix_notation(), "∨ P(x) Q(x)");
+    }
+
+    #[test]
+    fn test_implication_to_prefix_notation() {
+        let formula = Formula::Implication(
+            Box::new(Formula::Term("P(x)".to_string())),
+            Box::new(Formula::Term("Q(x)".to_string())),
+        );
+        assert_eq!(formula.to_prefix_notation(), "→ P(x) Q(x)");
+    }
+
+    #[test]
+    fn test_equivalence_to_prefix_notation() {
+        let formula = Formula::Equivalence(
+            Box::new(Formula::Term("P(x)".to_string())),
+            Box::new(Formula::Term("Q(x)".to_string())),
+        );
+        assert_eq!(formula.to_prefix_notation(), "= P(x) Q(x)");
+    }
+
+    #[test]
+    fn test_less_than_to_prefix_notation() {
+        let formula = Formula::LessThan(
+            Box::new(Formula::Term("x".to_string())),
+            Box::new(Formula::Term("y".to_string())),
+        );
+        assert_eq!(formula.to_prefix_notation(), "< x y");
+    }
+
+    #[test]
+    fn test_universal_quantifier_to_prefix_notation() {
+        let formula = Formula::UniversalQuantifier(
+            "x".to_string(),
+            Box::new(Formula::Term("P(x)".to_string())),
+        );
+        assert_eq!(formula.to_prefix_notation(), "∀ x P(x)");
+    }
+
+    #[test]
+    fn test_existential_quantifier_to_prefix_notation() {
+        let formula = Formula::ExistentialQuantifier(
+            "y".to_string(),
+            Box::new(Formula::Term("Q(y)".to_string())),
+        );
+        assert_eq!(formula.to_prefix_notation(), "∃ y Q(y)");
+    }
+
+    #[test]
+    fn test_complex_formula_to_prefix_notation() {
+        let formula = Formula::Conjunction(
+            Box::new(Formula::UniversalQuantifier(
+                "x".to_string(),
+                Box::new(Formula::Implication(
+                    Box::new(Formula::Term("P(x)".to_string())),
+                    Box::new(Formula::Negation(Box::new(Formula::Term(
+                        "Q(x)".to_string(),
+                    )))),
+                )),
+            )),
+            Box::new(Formula::ExistentialQuantifier(
+                "y".to_string(),
+                Box::new(Formula::Disjunction(
+                    Box::new(Formula::Term("R(y)".to_string())),
+                    Box::new(Formula::Term("S(y)".to_string())),
+                )),
+            )),
+        );
+
+        assert_eq!(
+            formula.to_prefix_notation(),
+            "∧ ∀ x → P(x) ¬ Q(x) ∃ y ∨ R(y) S(y)"
+        );
+    }
+
+    #[test]
+    fn test_term_to_infix_notation() {
+        let formula = Formula::Term("P(x)".to_string());
+        assert_eq!(formula.to_infix_notation(), "P(x)");
+    }
+
+    #[test]
+    fn test_negation_to_infix_notation() {
+        let formula = Formula::Negation(Box::new(Formula::Term("P(x)".to_string())));
+        assert_eq!(formula.to_infix_notation(), "(¬P(x))");
+    }
+
+    #[test]
+    fn test_conjunction_to_infix_notation() {
+        let formula = Formula::Conjunction(
+            Box::new(Formula::Term("P(x)".to_string())),
+            Box::new(Formula::Term("Q(x)".to_string())),
+        );
+        assert_eq!(formula.to_infix_notation(), "(P(x)∧Q(x))");
+    }
+
+    #[test]
+    fn test_disjunction_to_infix_notation() {
+        let formula = Formula::Disjunction(
+            Box::new(Formula::Term("P(x)".to_string())),
+            Box::new(Formula::Term("Q(x)".to_string())),
+        );
+        assert_eq!(formula.to_infix_notation(), "(P(x)∨Q(x))");
+    }
+
+    #[test]
+    fn test_implication_to_infix_notation() {
+        let formula = Formula::Implication(
+            Box::new(Formula::Term("P(x)".to_string())),
+            Box::new(Formula::Term("Q(x)".to_string())),
+        );
+        assert_eq!(formula.to_infix_notation(), "(P(x)→Q(x))");
+    }
+
+    #[test]
+    fn test_equivalence_to_infix_notation() {
+        let formula = Formula::Equivalence(
+            Box::new(Formula::Term("P(x)".to_string())),
+            Box::new(Formula::Term("Q(x)".to_string())),
+        );
+        assert_eq!(formula.to_infix_notation(), "(P(x)=Q(x))");
+    }
+
+    #[test]
+    fn test_less_than_to_infix_notation() {
+        let formula = Formula::LessThan(
+            Box::new(Formula::Term("x".to_string())),
+            Box::new(Formula::Term("y".to_string())),
+        );
+        assert_eq!(formula.to_infix_notation(), "(x<y)");
+    }
+
+    #[test]
+    fn test_universal_quantifier_to_infix_notation() {
+        let formula = Formula::UniversalQuantifier(
+            "x".to_string(),
+            Box::new(Formula::Term("P(x)".to_string())),
+        );
+        assert_eq!(formula.to_infix_notation(), "∀x(P(x))");
+    }
+
+    #[test]
+    fn test_existential_quantifier_to_infix_notation() {
+        let formula = Formula::ExistentialQuantifier(
+            "y".to_string(),
+            Box::new(Formula::Term("Q(y)".to_string())),
+        );
+        assert_eq!(formula.to_infix_notation(), "∃y(Q(y))");
+    }
+
+    #[test]
+    fn test_complex_formula_to_infix_notation() {
+        let formula = Formula::Conjunction(
+            Box::new(Formula::UniversalQuantifier(
+                "x".to_string(),
+                Box::new(Formula::Implication(
+                    Box::new(Formula::Term("P(x)".to_string())),
+                    Box::new(Formula::Negation(Box::new(Formula::Term(
+                        "Q(x)".to_string(),
+                    )))),
+                )),
+            )),
+            Box::new(Formula::ExistentialQuantifier(
+                "y".to_string(),
+                Box::new(Formula::Disjunction(
+                    Box::new(Formula::Term("R(y)".to_string())),
+                    Box::new(Formula::Term("S(y)".to_string())),
+                )),
+            )),
+        );
+
+        assert_eq!(
+            formula.to_infix_notation(),
+            "(∀x((P(x)→(¬Q(x))))∧∃y((R(y)∨S(y))))"
+        );
+    }
+
+    #[test]
+    fn test_get_info() {
+        let formulae: [Formula; 10] = [
+            Formula::new("x"),
+            Formula::new("¬ x"),
+            Formula::new("∧ x y"),
+            Formula::new("∨ x y"),
+            Formula::new("→ x y"),
+            Formula::new("= x y"),
+            Formula::new("∀ x x"),
+            Formula::new("∃ x x"),
+            Formula::new("∃ a → b ∧ c a"),
+            Formula::new("→ ¬ ∨ ∧ a b c d"),
+        ];
+
+        let expected_results: [[&str; 3]; 10] = [
+            ["Term", "x", ""],
+            ["Negation", "x", ""],
+            ["Conjunction", "x", "y"],
+            ["Disjunction", "x", "y"],
+            ["Implication", "x", "y"],
+            ["Equivalence", "x", "y"],
+            ["UniversalQuantifier", "x", "x"],
+            ["ExistentialQuantifier", "x", "x"],
+            ["ExistentialQuantifier", "a", "→ b ∧ c a"],
+            ["Implication", "¬ ∨ ∧ a b c", "d"],
+        ];
+
+        for (formula, expected) in formulae.iter().zip(expected_results.iter()) {
+            let info = formula.get_info();
+            assert_eq!(
+                [info[0].as_str(), info[1].as_str(), info[2].as_str()],
+                *expected
+            );
+        }
+    }
+}
