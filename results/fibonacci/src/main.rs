@@ -1,4 +1,3 @@
-use first_order::Formula;
 use hoare_triple::{Triple, composition_rule, consequence_rule, while_rule};
 use proof_line::ProofLine;
 
