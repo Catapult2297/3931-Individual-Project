@@ -436,7 +436,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "The input")]
     fn test_malformed_formula_missing_token() {
-        // This input contains an unexpected token
+        // This input contains an missing token
         Formula::new("∧ ∀ x → P(x) ∧ Q(x) ∃ y ∨ R(y) = T(x) < U V");
     }
 
