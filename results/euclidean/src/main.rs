@@ -1,11 +1,11 @@
 use first_order::Formula;
-use hoare_triple::{composition_rule, while_rule, Triple};
+use hoare_triple::{Triple, composition_rule, while_rule};
 use proof_line::ProofLine;
 /// Reference Code:
 ///```
 /// fn gcd(a: u32, b: u32) -> u32 {
-///     let mut b: u32 = b;
 ///     let mut a: u32 = a;
+///     let mut b: u32 = b;
 ///     let mut temp: u32;
 ///     while b != 0 {
 ///         temp = b;
@@ -15,18 +15,6 @@ use proof_line::ProofLine;
 ///     a
 /// }
 /// ```
-
-fn gcd(a: u32, b: u32) -> u32 {
-    let mut b: u32 = b;
-    let mut a: u32 = a;
-    let mut temp: u32;
-    while b != 0 {
-        temp = b;
-        b = a % b;
-        a = temp;
-    }
-    a
-}
 
 fn main() {
     let mut proof: Vec<ProofLine> = vec![];

@@ -1,5 +1,4 @@
-use first_order::Formula;
-use hoare_triple::{composition_rule, while_rule, Triple};
+use hoare_triple::{Triple, composition_rule, while_rule};
 use proof_line::ProofLine;
 
 ///Reference Code

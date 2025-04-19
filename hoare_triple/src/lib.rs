@@ -134,8 +134,9 @@ impl fmt::Display for Triple {
 pub fn composition_rule(left: &Triple, right: &Triple) -> Result<Triple, String> {
     if left.postcondition.to_string() != right.precondition.to_string() {
         return Err(format!(
-            "The input triples do not have matching midcondition\nleft postcondition: {:?}, right precondition: {:?}",
-            left.postcondition, right.precondition
+            "The input triples do not have matching midcondition\nleft postcondition: {:?}\n right precondition: {:?}",
+            left.postcondition.to_prefix_notation(),
+            right.precondition.to_prefix_notation()
         ));
     }
     Ok(Triple::new(
@@ -181,14 +182,15 @@ pub fn condition_rule(left: &Triple, right: &Triple) -> Result<Triple, String> {
         );
     } else if left.precondition.get_info()[1] != *negated_condition {
         return Err(format!(
-            "The input triples do not match negated {:?} and unnegated {:?} conditions",
+            "The input triples do not match\nnegated {:?}\nunnegated {:?} conditions",
             left.precondition.get_info()[1],
             negated_condition
         ));
     } else if left.postcondition != right.postcondition {
         return Err(format!(
-            "The input triples do not have identical postconditions\nleft: {}, right: {}",
-            left.postcondition, right.postcondition
+            "The input triples do not have identical postconditions\nleft: {:?}\nright: {:?}",
+            left.postcondition.to_prefix_notation(),
+            right.postcondition.to_prefix_notation()
         ));
     }
     Ok(Triple::new(

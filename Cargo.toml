@@ -6,7 +6,7 @@ resolver = "2"
 edition = "2024"
 
 [workspace]
-members = ["results/dec_to_bin", "results/euclidean","first_order", "hoare_triple", "results/quotient_remainder", "proof_line", "results/factorial", "results/fibonacci", "tmp"]
+members = ["results/dec_to_bin", "results/euclidean","first_order", "hoare_triple", "results/quotient_remainder", "proof_line", "results/factorial", "results/fibonacci"]
 
 [workspace.dependencies]
 first_order = "first_order/"
